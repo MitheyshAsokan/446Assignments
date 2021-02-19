@@ -142,7 +142,15 @@ ggplot(songs, aes(x=duration_ms, y=danceability)) +
   geom_line(aes(y=preds), colour="blue")
 ```
 
+The line is appropriate fit (very low Mean Root Squared), that is downard sloping. Which means that danceability gradually falls as the duration of the song increases. This explanation is in line with how exhausted a dancer is getting with time. The longer the song, the more exhausted the dancer gets, which leads to stoppage. 
 
+According to the summary, the data for danceability is strongly correlated with duration. 
+
+The p-values are very close to zero and they are significant (due to the ***).
+
+The f-stat is also very high for the degrees of freedom used.
+
+The RMSE is also very low.
 
 2. Using all your input variables, fit a multiple linear regression model
 
@@ -162,6 +170,13 @@ fit2 <- lm(danceability ~ duration_ms + energy + speechiness + playlist_genre, d
 summary(fit2)
 ```
 
+The fit is appropriate (low Root Mean Squared, but it is getting better as we add more input variables), which means that danceability related to duration, energy, speechiness, and genre of the song.
+
+The p-values are very close to zero and they are significant (due to the ***). Except for the R&B genre, which only score 2 asterisks for coefficient significance. This is expected as the genre is not intended for dancing.
+
+The f-stat is also very high for the degrees of freedom used.
+
+The RMSE is also very low.
 
 
 3. Now, do the same things as you did, but this time add an interaction between one categorical and one numeric variable.
@@ -177,6 +192,14 @@ fit3 <- lm(danceability ~ duration_ms + energy + speechiness + playlist_genre + 
 ```{r}
 summary(fit3)
 ```
+
+The fit is appropriate (low Root Mean Squared, but it is getting better as we add more input variables), which means that danceability related to duration, energy, speechiness, genre of the song, and the speechiness of each genre.
+
+The p-values are very close to zero and they are significant (due to the ***). Except for the R&B genre, which only score 1 asterisk for coefficient significance (This is expected as the genre is not intended for dancing) and the speechiness of the latin, pop, and r&b genres (Which is also expected, as the latin and pop songs tend to focus on the music instead of the lyric to get people dancing to them).
+
+The f-stat is also very high for the degrees of freedom used.
+
+The RMSE is also very low.
 
 4. Which model you fit is the best in predicting the output variable? Which one is the second and third best? Rank the models based on their performance.
 
@@ -272,8 +295,7 @@ ggplot(Auto, aes(x=horsepower, y=mpg)) +
 
 Negative relationship. MPG decreases as Horsepower increases.
 
-The relation seems to non-linear, as the scatterplot depict a curved shaped best-fit line.
-
+The relationship seems to be non-linear, as the scatterplot depicts a curved shaped best-fit line.
 
 
 2. Plot the scatterplot between `log(mpg)` and `log(horsepower)`.
@@ -389,6 +411,9 @@ theta   <- GDA(x, y, theta0, alpha = 0.01, epsilon = 1e-6)
 plot_line(theta)
 ```
 
+The resulting line did change. The slope increased, hence the best fit line is not a bteer representation of the data points. The increased learning rate, slightly increased our predictions, which seems to be a step in the right dirextion.
+
+
 4. Set alpha back to `alpha=0.05` and try `theta0=c(1,1)` vs. `theta0=c(1,-1)`:
    - How many iterations did it take? Which is less than the other?
    - Why starting with a negative slope have this effect?
@@ -404,6 +429,10 @@ theta   <- GDA(x, y, theta0, alpha = 0.05, epsilon = 1e-6)
 plot_line(theta)
 ```
 
+theta0=c(1,1) took 7531 iterations, while theta0=c(1,-1) took 7265 iterations. 
+
+Starting with the negative slope is the accurate decision, since the data is downward sloping. Adding weight to the negative slope is rewarded with lower iterations to complete.
+
 5. Reduce epsilon to `epsilon = 1e-8` and try `alpha=0.01`, `alpha=0.05` and `alpha=0.1`.
    - What effect does alpha have on iterations and resulting fitted line?
 ```{r}
@@ -414,9 +443,13 @@ theta   <- GDA(x, y, theta0, alpha = 0.01, epsilon = 1e-8)
 plot_line(theta)
 theta   <- GDA(x, y, theta0, alpha = 0.05, epsilon = 1e-8)
 plot_line(theta)
-# theta   <- GDA(x, y, theta0, alpha = 0.095, epsilon = 1e-8)
-# plot_line(theta)
+
+#Commented out, as it seems to crash the GDA function. (Error in GDA, Cost is increasing. Try reducing Alpha.)
+#theta   <- GDA(x, y, theta0, alpha = 0.1, epsilon = 1e-8)
+#plot_line(theta)
 ```
+
+Increasing the learning rate improves the predictions and the slope changes to better reflect the datapoints in the scatterplat. This can be clearly observed in the plots drawn for alpha = 0.01 and alpha = 0.05.
 
 \pagebreak
 
