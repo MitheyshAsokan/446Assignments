@@ -1,0 +1,93 @@
+---
+title: 'Lab Report 2'
+author: "Mitheysh Asokan, Jason (Eungjoo) Kim"
+geometry: margin=.75in
+output:
+  pdf_document: default
+  word_document: default
+  html_document:
+    df_print: paged
+    theme: cosmo
+header-includes:
+- \usepackage{graphicx}
+- \usepackage{color}
+graphics: yes
+fontsize: 11pt
+---
+
+<!-- You can check templates from this website and change html theme: https://www.datadreaming.org/post/r-markdown-theme-gallery/ -->
+<!-- It won't affect the PDF or Word. -->
+
+```{r echo=FALSE, message=FALSE, error=FALSE}
+
+library('tidyverse')
+library('gridExtra')
+library('caret')
+library('ISLR')
+
+```
+
+
+\pagebreak
+
+## Question 2: 
+
+### 2.2
+
+```{r}
+cv.fit  <- cv.glmnet(x,y,alpha=1, family="binomial", nfolds = 10)
+cv.fit$lambda.min
+```
+
+The value here is 0.002455181
+
+```{r}
+cv.fit  <- cv.glmnet(x,y,alpha=0, family="binomial", nfolds = 10)
+cv.fit$lambda.min
+```
+The value here is 0.02822862
+
+### 2.3
+
+```{r}
+# Model w.o Regularization
+newdata_x   <- model.matrix(IsMentalHealthRelated ~ .,test)
+probs <- predict(fit.logreg,newdata_x,type = "response")
+preds <- ifelse(probs >= 0.5, 1, 0)
+target <- ifelse(test$IsMentalHealthRelated == "Yes", 1, 0)
+acc1 <- mean(preds == target)
+
+# Model with L1 Regularization
+newdata_x   <- model.matrix(IsMentalHealthRelated ~ .,test)
+probs <- predict(fit.l1,newdata_x,type = "response")
+preds <- ifelse(probs >= 0.5, 1, 0)
+target <- ifelse(test$IsMentalHealthRelated == "Yes", 1, 0)
+acc2 <- mean(preds == target)
+
+# Model with L2 Regularization
+newdata_x   <- model.matrix(IsMentalHealthRelated ~ .,test)
+probs <- predict(fit.l2,newdata_x,type = "response")
+preds <- ifelse(probs >= 0.5, 1, 0)
+target <- ifelse(test$IsMentalHealthRelated == "Yes", 1, 0)
+acc3 <- mean(preds == target)
+```
+
+Accuracy of logistic regression without regularization (acc1) is 41.2%
+Accuracy of logistic regression with l1 regularization (acc2) is 46.2%
+Accuracy of logistic regression with l2 regularization (acc3) is 46.5%
+
+We see higher accuracy when applying regularization to the logistic regression as overfitting is minimized.
+
+### 2.4
+```{r}
+sort(coef(fit.l1)[,1])
+sort(coef(fit.l2)[,1])
+```
+
+Words that are related to school and mental health, such as: "depression, term, mental-health, anxiety, co-op" seemed to show the highest cofficient estimations.The words that are related to fitness, such as: "fitness, workout, muscle, protein, weight" show lowest coefficient estimations.
+
+L1 regularization method tends to approximate many coefficients when the values are higher than two significant digits to zero. The L1 regularization enforces sparsity; the less important coefficients given the model are zeroed out. This methodology essentially removes the corresponding feature from the model, hence optimizing RAM usage as well as reducing noise in the model.
+
+L2 regularization method tends to shrink all the coefficients and doesn't zero any. This is because we define the regularization in L2 as the sum of the squares of all the feature weights. In this context, weights close to zero have little effect on the model complexity, while outlier weights can have a significant impact. Therefore, we are not concerned with zeroing any of the coefficients. 
+
+\pagebreak
