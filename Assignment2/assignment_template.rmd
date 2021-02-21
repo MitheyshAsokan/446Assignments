@@ -20,35 +20,60 @@ fontsize: 11pt
 
 ```{r echo=FALSE, message=FALSE, error=FALSE}
 
-library('tidyverse')
-library('gridExtra')
-library('caret')
-library('ISLR')
+#### For Q2
+library('glmnet')
+
+#### For Q3
+library("tidyverse")
+library("leaps")
+library("AmesHousing")
 
 ```
 
 
 \pagebreak
 
-## Question 2: 
+## Question 2 Text Classification
 
-### 2.2
+### 2.2 Model Fitting
 
+Initial Data Read and Setup
 ```{r}
+health <- read.csv("mental_health.csv")[,-1]
+
+## 80% of the sample size
+smp_size <- floor(0.80 * nrow(health))
+
+## set the seed to make your partition reproducible
+set.seed(123)
+train_ind <- sample(seq_len(nrow(health)), size = smp_size)
+
+train <- health[train_ind, ]
+test <- health[-train_ind, ]
+
+x   <- model.matrix(IsMentalHealthRelated ~ .,train)
+y   <- train$IsMentalHealthRelated
+
+```
+
+Determining the optimal labmda values for L1 and L2 regularization
+```{r eval=FALSE}
 cv.fit  <- cv.glmnet(x,y,alpha=1, family="binomial", nfolds = 10)
-cv.fit$lambda.min
-```
+cv.fit$lambda.min # 0.002455181
 
-The value here is 0.002455181
-
-```{r}
 cv.fit  <- cv.glmnet(x,y,alpha=0, family="binomial", nfolds = 10)
-cv.fit$lambda.min
+cv.fit$lambda.min # 0.02822862
+
 ```
-The value here is 0.02822862
 
-### 2.3
+Fitting the Models
+```{r}
+fit.logreg <- glmnet(x,y,family="binomial")
+fit.l1 <- glmnet(x,y,alpha=1,family="binomial", lambda = 0.002455181)
+fit.l2 <- glmnet(x,y,alpha=0,family="binomial", lambda = 0.02822862)
+```
 
+### 2.3 Performance Comparison
 ```{r}
 # Model w.o Regularization
 newdata_x   <- model.matrix(IsMentalHealthRelated ~ .,test)
@@ -78,16 +103,124 @@ Accuracy of logistic regression with l2 regularization (acc3) is 46.5%
 
 We see higher accuracy when applying regularization to the logistic regression as overfitting is minimized.
 
-### 2.4
+### 2.4 Interpretation of Models
+L1 Regularization Sorted Results
 ```{r}
 sort(coef(fit.l1)[,1])
+```
+
+L2 Regularization Sorted Results
+```{r}
 sort(coef(fit.l2)[,1])
 ```
 
-Words that are related to school and mental health, such as: "depression, term, mental-health, anxiety, co-op" seemed to show the highest cofficient estimations.The words that are related to fitness, such as: "fitness, workout, muscle, protein, weight" show lowest coefficient estimations.
+Words that are related to school and mental health, such as: "depression, term, mental-health, anxiety, co-op" seemed to show the highest coefficient estimations.The words that are related to fitness, such as: "fitness, workout, muscle, protein, weight" show lowest coefficient estimations.
 
 L1 regularization method tends to approximate many coefficients when the values are higher than two significant digits to zero. The L1 regularization enforces sparsity; the less important coefficients given the model are zeroed out. This methodology essentially removes the corresponding feature from the model, hence optimizing RAM usage as well as reducing noise in the model.
 
 L2 regularization method tends to shrink all the coefficients and doesn't zero any. This is because we define the regularization in L2 as the sum of the squares of all the feature weights. In this context, weights close to zero have little effect on the model complexity, while outlier weights can have a significant impact. Therefore, we are not concerned with zeroing any of the coefficients. 
 
 \pagebreak
+
+## Question 3 Subset Selection
+
+### Forward Selection
+
+Data Initialization and setting up the variables
+```{r}
+ames        <- AmesHousing::make_ames()
+numericVars <- ames %>% summarise_all(is.numeric) %>% unlist()
+ames        <- ames[, numericVars]
+NumCols     <- ncol(ames)
+
+res <- regsubsets(Sale_Price ~ .,data=ames, method = "forward",  nvmax=NumCols)
+smm <- summary(res)
+smm$rss
+
+min_rss <- which.min(smm$rss)
+min_bic <- which.min(smm$bic)
+
+min_rss
+min_bic
+```
+
+#### RSS Plot (Forward Selection)
+
+Plotting the RSS of each Model (Forward Selection)
+```{r}
+plot(smm$rss,xlab="Number of Predictors", ylab="RSS", type='l')
+points(min_rss, smm$rss[min_rss], col="red", cex=2, pch=20)
+```
+
+The best model, that is, a model that produces the least RSS is the model that uses 33 predictors. The coefficients of these are as follows:
+```{r}
+coef(res, min_rss)
+```
+
+#### BIC Plot (Forward Selection)
+
+Plotting the BIC of each Model (Forward Selection)
+```{r}
+plot(smm$bic,xlab="Number of Predictors", ylab="BIC", type='l')
+points(min_bic, smm$bic[min_bic], col="red", cex=2, pch=20)
+```
+
+The best model, that is, a model that produces the least BIC is the model that uses 21 predictors. The coefficients of these are as follows:
+```{r}
+coef(res, min_bic)
+```
+
+
+
+
+
+
+
+
+### Backward Selection
+
+Data Initialization and setting up the variables
+```{r}
+ames        <- AmesHousing::make_ames()
+numericVars <- ames %>% summarise_all(is.numeric) %>% unlist()
+ames        <- ames[, numericVars]
+NumCols     <- ncol(ames)
+
+res <- regsubsets(Sale_Price ~ .,data=ames, method = "backward",  nvmax=NumCols)
+smm <- summary(res)
+smm$rss
+
+min_rss <- which.min(smm$rss)
+min_bic <- which.min(smm$bic)
+
+min_rss
+min_bic
+```
+
+#### RSS Plot (Backward Selection)
+
+Plotting the RSS of each Model (Backward Selection)
+```{r}
+plot(smm$rss,xlab="Number of Predictors", ylab="RSS", type='l')
+points(min_rss, smm$rss[min_rss], col="red", cex=2, pch=20)
+```
+
+The best model, that is, a model that produces the least RSS is the model that uses 33 predictors. The coefficients of these are as follows:
+```{r}
+coef(res, min_rss)
+```
+
+#### BIC Plot (Backward Selection)
+
+Plotting the BIC of each Model (Backward Selection)
+```{r}
+plot(smm$bic,xlab="Number of Predictors", ylab="BIC", type='l')
+points(min_bic, smm$bic[min_bic], col="red", cex=2, pch=20)
+```
+
+The best model, that is, a model that produces the least BIC is the model that uses 22 predictors. The coefficients of these are as follows:
+```{r}
+coef(res, min_bic)
+```
+
+
