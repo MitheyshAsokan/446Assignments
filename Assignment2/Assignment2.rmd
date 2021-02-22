@@ -60,14 +60,6 @@ diamonds <- na.omit(diamonds)
 dim(diamonds)
 ```
 
-Downsample if your data is larger than 5000 rows:
-
-```{r warning=FALSE, message=FALSE}
-diamonds <- diamonds[diamonds$price > 2500,]
-
-dim(diamonds)
-```
-
 If there are numeric variables that were supposed to be categorical, convert them to categorical
 
 ```{r warning=FALSE, message=FALSE}
@@ -238,25 +230,12 @@ RMSE(pred4, test$price)
 
 What is the test error of each resulting model? 
 
-Best: Model2
+Best: Model4
 
 Worst: Model1
 
-Ranking: Model2, Model4, Model3, Model1
+Ranking: Model4, Model2, Model3, Model1
 
-```{r warning=FALSE, message=FALSE}
-
-pred1 <- predict(model1, newdata=test)
-pred2 <- predict(model2, newdata=test)
-pred3 <- predict(model3, newdata=test)
-pred4 <- predict(model4, newdata=test)
-
-RMSE(pred1, test$price)
-RMSE(pred2, test$price)
-RMSE(pred3, test$price)
-RMSE(pred4, test$price)
-
-```
 
 Did the order of models’ test performances change when trained using cross validation?
 
@@ -321,7 +300,7 @@ Which model yielded the minimum test loss? Rank the 6 models.
 
 Minimum Test Loss: Model1
 
-Rankings: Model1, Model3, Model2, Model4, Model6, Model5
+Rankings: Model1, Model2, Model3, Model4, Model6, Model5
 
 \pagebreak
 
