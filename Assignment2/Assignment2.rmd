@@ -350,27 +350,27 @@ fit.l2 <- glmnet(x,y,alpha=0,family="binomial", lambda = 0.02822862)
 newdata_x   <- model.matrix(IsMentalHealthRelated ~ .,test)
 probs <- predict(fit.logreg,newdata_x,type = "response")
 preds <- ifelse(probs >= 0.5, 1, 0)
-target <- ifelse(test$IsMentalHealthRelated == "Yes", 1, 0)
+target <- ifelse(test$IsMentalHealthRelated == 1, 1, 0)
 acc1 <- mean(preds == target)
 
 # Model with L1 Regularization
 newdata_x   <- model.matrix(IsMentalHealthRelated ~ .,test)
 probs <- predict(fit.l1,newdata_x,type = "response")
 preds <- ifelse(probs >= 0.5, 1, 0)
-target <- ifelse(test$IsMentalHealthRelated == "Yes", 1, 0)
+target <- ifelse(test$IsMentalHealthRelated == 1, 1, 0)
 acc2 <- mean(preds == target)
 
 # Model with L2 Regularization
 newdata_x   <- model.matrix(IsMentalHealthRelated ~ .,test)
 probs <- predict(fit.l2,newdata_x,type = "response")
 preds <- ifelse(probs >= 0.5, 1, 0)
-target <- ifelse(test$IsMentalHealthRelated == "Yes", 1, 0)
+target <- ifelse(test$IsMentalHealthRelated == 1, 1, 0)
 acc3 <- mean(preds == target)
 ```
 
-Accuracy of logistic regression without regularization (acc1) is 41.2%
-Accuracy of logistic regression with l1 regularization (acc2) is 46.2%
-Accuracy of logistic regression with l2 regularization (acc3) is 46.5%
+Accuracy of logistic regression without regularization (acc1) is 83.06%
+Accuracy of logistic regression with l1 regularization (acc2) is 86.46%
+Accuracy of logistic regression with l2 regularization (acc3) is 86.94%
 
 We see higher accuracy when applying regularization to the logistic regression as overfitting is minimized.
 

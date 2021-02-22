@@ -28,21 +28,21 @@ head(coef(fit.l2)[,1], 10)
 newdata_x   <- model.matrix(IsMentalHealthRelated ~ .,test)
 probs <- predict(fit.logreg,newdata_x,type = "response")
 preds <- ifelse(probs >= 0.5, 1, 0)
-target <- ifelse(test$IsMentalHealthRelated == "Yes", 1, 0)
+target <- ifelse(test$IsMentalHealthRelated == 1, 1, 0)
 acc1 <- mean(preds == target)
 
 # Model with L1 Regularization
 newdata_x   <- model.matrix(IsMentalHealthRelated ~ .,test)
 probs <- predict(fit.l1,newdata_x,type = "response")
 preds <- ifelse(probs >= 0.5, 1, 0)
-target <- ifelse(test$IsMentalHealthRelated == "Yes", 1, 0)
+target <- ifelse(test$IsMentalHealthRelated == 1, 1, 0)
 acc2 <- mean(preds == target)
 
 # Model with L2 Regularization
 newdata_x   <- model.matrix(IsMentalHealthRelated ~ .,test)
 probs <- predict(fit.l2,newdata_x,type = "response")
 preds <- ifelse(probs >= 0.5, 1, 0)
-target <- ifelse(test$IsMentalHealthRelated == "Yes", 1, 0)
+target <- ifelse(test$IsMentalHealthRelated == 1, 1, 0)
 acc3 <- mean(preds == target)
 
 
