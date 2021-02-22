@@ -136,7 +136,6 @@ One simple linear regression,
 ```{r warning=FALSE, message=FALSE}
 
 fit1 <- lm(price ~ carat, data = train)
-summary(fit1)
 
 ```
 
@@ -145,7 +144,6 @@ One multilinear regression with all the variables you selected.
 ```{r warning=FALSE, message=FALSE}
 
 fit2 <- lm(price ~ . , data = train)
-summary(fit2)
 
 ```
 
@@ -154,7 +152,6 @@ One polynomial regression using one input variable and one output variable.
 ```{r warning=FALSE, message=FALSE}
 
 fit3 <- lm(price ~ poly(carat,2), data = train)
-summary(fit3)
 
 ```
 
@@ -163,9 +160,6 @@ One Locally Weighted Regression using one input numeric input variable and one o
 ```{r warning=FALSE, message=FALSE}
 
 fit4 <- loess(price ~ depth, data = train)
-summary(fit4)
-
-
 
 ```
 
