@@ -33,4 +33,17 @@ fontsize: 11pt
 \pagebreak
 
 
+## Question 2: Tree-based methods
+
+## 2.1 Preprocess
+
+## 2.2 Decision Trees for Regression
+
+## 2.3. Decision Trees for Classification
+
+## 2.4. Bagging: Regression 
+
+## 2.5. Bagging: Classification
+
+## 2.6. Random Forest: Regression
 
