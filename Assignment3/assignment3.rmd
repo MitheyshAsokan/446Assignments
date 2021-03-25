@@ -16,18 +16,323 @@ fontsize: 11pt
 ---
 
 
-## Question 1: Classification
+```{r echo=FALSE, message=FALSE}
 
+library('tidyverse')
+library('e1071')
+library('rpart')
+library('parsnip')
+library('tree')
+library('gridExtra')
+library('MLmetrics')
+library('caret')
+
+```
+
+
+
+## Question 1: Classification
 
 ### 1.1. Preprocess and Plot
 
+```{r, message=FALSE, warning=FALSE}
+
+croissant <- read.csv('croissant.csv')
+
+circles <- read.csv('circles.csv')
+varied <- read.csv('varied.csv')
+
+croissant$y <- as.factor(croissant$y)
+circles$y <- as.factor(circles$y)
+varied$y <- as.factor(varied$y)
+
+g1 <- ggplot(croissant, aes(x1,x2,colour=y)) +
+  geom_point() + 
+  ggtitle("Croissant Dataset") + 
+  theme(legend.position = "none")
+
+g2 <- ggplot(circles, aes(x1,x2,colour=y)) +
+  geom_point() + 
+  ggtitle("Circle Dataset") + 
+  theme(legend.position = "none")
+
+g3 <- ggplot(varied, aes(x1,x2,colour=y)) +
+  geom_point() + 
+  ggtitle("Varied Dataset") + 
+  theme(legend.position = "none")
+
+grid.arrange(g1,g2,g3,ncol=2)
+
+```
+
 ### 1.2. Train / Test split
+
+```{r, message=FALSE, warning=FALSE}
+
+set.seed(112)
+
+dat <- croissant
+train_ind <- sample(1:nrow(dat), floor(0.5*nrow(dat)))
+
+train.croissant <- dat[ train_ind,]
+test.croissant  <- dat[-train_ind,]
+
+dat <- circles
+train_ind <- sample(1:nrow(dat), floor(0.5*nrow(dat)))
+
+train.circles <- dat[ train_ind,]
+test.circles <- dat[-train_ind,]
+
+dat <- varied
+train_ind <- sample(1:nrow(dat), floor(0.5*nrow(dat)))
+
+train.varied <- dat[ train_ind,]
+test.varied <- dat[-train_ind,]
+
+```
 
 ### 1.3. Train and Test
 
+### Croissants
+
+```{r, message=FALSE, warning=FALSE}
+
+logreg.croissant <- glm(y ~ x1+x2, data= train.croissant, family="binomial")
+tree.croissant <- tree(y~x1+x2, data=train.croissant)
+svmfit.croissant <-  svm(y ~ x1+x2, data=train.croissant , kernel ="radial", 
+                         cost =1,gamma =1,scale =FALSE)
+
+preds.logreg <- predict(logreg.croissant,test.croissant,type = "response") > 0.5
+preds.tree <- predict(tree.croissant,test.croissant, type="class")
+preds.svm <- predict(svmfit.croissant,test.croissant, type="class")
+
+g1 <- ggplot(test.croissant, aes(x1,x2,colour=y)) +
+  geom_point() + 
+  ggtitle("True Classes") + 
+  theme(legend.position = "none")
+g2 <- ggplot(test.croissant, aes(x1,x2,colour=preds.logreg)) +
+  geom_point() +
+  ggtitle("Logreg Preds") +
+  theme(legend.position = "none")
+g3 <- ggplot(test.croissant, aes(x1,x2,colour=preds.tree)) +
+  geom_point() +
+  ggtitle("Decision Tree Preds") +
+  theme(legend.position = "none")
+g4 <- ggplot(test.croissant, aes(x1,x2,colour=preds.svm)) +
+  geom_point() +
+  ggtitle("SVM Preds") +
+  theme(legend.position = "none")
+
+grid.arrange(g1,g2,g3,g4,ncol=2)
+
+Accuracy(preds.logreg, test.croissant$y==1)
+ConfusionMatrix(preds.tree, test.croissant$y)
+table(predict=preds.svm,actual=(test.croissant$y==1))
+```
+
+Based on the results, the decision tree produced the highest accuracy.
+
+### Circles
+
+```{r, message=FALSE, warning=FALSE}
+
+logreg.circles <- glm(y ~ x1+x2, data= train.circles, family="binomial")
+tree.circles <- tree(y~x1+x2, data=train.circles)
+svmfit.circles <-  svm(y ~ x1+x2, data=train.circles , kernel ="radial", 
+                       cost =1, gamma=1,scale =FALSE)
+
+preds.logreg <- predict(logreg.circles,test.circles,type = "response") > 0.5
+preds.tree <- predict(tree.circles,test.circles, type="class")
+preds.svm <- predict(svmfit.circles,test.circles, type="class")
+
+g1 <- ggplot(test.circles, aes(x1,x2,colour=y)) +
+  geom_point() + 
+  ggtitle("True Classes") + 
+  theme(legend.position = "none")
+g2 <- ggplot(test.circles, aes(x1,x2,colour=preds.logreg)) +
+  geom_point() +
+  ggtitle("Logreg Preds") +
+  theme(legend.position = "none")
+g3 <- ggplot(test.circles, aes(x1,x2,colour=preds.tree)) +
+  geom_point() +
+  ggtitle("Decision Tree Preds") +
+  theme(legend.position = "none")
+g4 <- ggplot(test.circles, aes(x1,x2,colour=preds.svm)) +
+  geom_point() +
+  ggtitle("SVM Preds") +
+  theme(legend.position = "none")
+
+grid.arrange(g1,g2,g3,g4,ncol=2)
+
+Accuracy(preds.logreg, test.circles$y==1)
+ConfusionMatrix(preds.tree, test.circles$y)
+table(predict=preds.svm,actual=(test.circles$y==1))
+```
+
+Based on the results, the SVM model produced the highest accuracy.
+
+
+### Varied
+
+```{r, message=FALSE, warning=FALSE}
+
+tree.varied <- tree(y~x1+x2, data=train.varied)
+svmfit.varied <-  svm(y ~ x1+x2, data=train.varied , kernel ="radial", 
+                      cost =1, gamma=1,scale =FALSE)
+
+preds.tree <- predict(tree.varied,test.varied, type="class")
+preds.svm <- predict(svmfit.varied,test.varied, type="class")
+
+g1 <- ggplot(test.varied, aes(x1,x2,colour=y)) +
+  geom_point() +
+  ggtitle("True Classes") +
+  theme(legend.position = "none")
+g2 <- ggplot(test.varied, aes(x1,x2,colour=preds.tree)) +
+  geom_point() +
+  ggtitle("Decision Tree Preds") +
+  theme(legend.position = "none")
+g3 <- ggplot(test.varied, aes(x1,x2,colour=preds.svm)) +
+  geom_point() +
+  ggtitle("SVM Preds") +
+  theme(legend.position = "none")
+
+grid.arrange(g1,g2,g3,ncol=2)
+
+ConfusionMatrix(preds.tree, test.varied$y)
+table(predict=preds.svm,actual=(test.varied$y==1))
+```
+
+Based on the results, the Decision tree model produced the highest accuracy.
+
 ### 1.4. Cross Validation
 
+### Croissant
 
+```{r, message=FALSE, warning=FALSE, error=FALSE}
+
+train_control <- trainControl(method = "cv", number = 10)
+logreg.croissant <- train(y ~ x1+x2, data= train.croissant, 
+                          trControl = train_control,method = "glm", 
+                          family=binomial())
+
+tree.croissant <- rpart(y~x1+x2, data=train.croissant)
+
+svmfit.croissant <-  tune(svm ,y ~ x1+x2,data=train.croissant ,
+                          kernel ="radial",scale =FALSE, 
+                          ranges =list(cost=c(0.01, 0.05, .1 ,1 ,10 ,100 ,1000),
+                                       gamma=c(0.5,1,2,3,4)))
+
+preds.logreg <- predict(logreg.croissant,test.croissant,type = "prob") > 0.5
+preds.tree <- predict(tree.croissant,test.croissant, type="class")
+preds.svm <- predict(svmfit.croissant$best.model,test.croissant, type="class")
+
+g1 <- ggplot(test.croissant, aes(x1,x2,colour=y)) +
+  geom_point() + 
+  ggtitle("True Classes") + 
+  theme(legend.position = "none")
+
+summary(preds.logreg)
+
+g3 <- ggplot(test.croissant, aes(x1,x2,colour=preds.tree)) +
+  geom_point() +
+  ggtitle("Decision Tree Preds") +
+  theme(legend.position = "none")
+g4 <- ggplot(test.croissant, aes(x1,x2,colour=preds.svm)) +
+  geom_point() +
+  ggtitle("SVM Preds") +
+  theme(legend.position = "none")
+
+grid.arrange(g1,g3,g4,ncol=2)
+
+Accuracy(preds.logreg, test.croissant$y==1)
+ConfusionMatrix(preds.tree, test.croissant$y)
+table(predict=preds.svm,actual=(test.croissant$y==1))
+```
+
+Based on the results, the SVM model produced the highest accuracy. 
+But, it is only slightly better than Decision tree.
+
+### Circles
+
+```{r, message=FALSE, warning=FALSE, error=FALSE}
+
+train_control <- trainControl(method = "cv", number = 10)
+logreg.circles <- train(y ~ x1+x2, data= train.circles, 
+                        trControl = train_control,method = "glm", 
+                        family=binomial())
+
+tree.circles <- rpart(y~x1+x2, data=train.circles)
+
+svmfit.circles <-  tune(svm ,y ~ x1+x2,data=train.circles ,kernel ="radial",
+                        scale =FALSE, 
+                        ranges =list(cost=c(0.01, 0.05, .1 ,1 ,10 ,100 ,1000),
+                                     gamma=c(0.5,1,2,3,4)))
+
+preds.logreg <- predict(logreg.circles,test.circles,type = "prob") > 0.5
+preds.tree <- predict(tree.circles,test.circles, type="class")
+preds.svm <- predict(svmfit.circles$best.model,test.circles, type="class")
+
+g1 <- ggplot(test.circles, aes(x1,x2,colour=y)) +
+  geom_point() + 
+  ggtitle("True Classes") + 
+  theme(legend.position = "none")
+
+summary(preds.logreg)
+
+g3 <- ggplot(test.circles, aes(x1,x2,colour=preds.tree)) +
+  geom_point() +
+  ggtitle("Decision Tree Preds") +
+  theme(legend.position = "none")
+g4 <- ggplot(test.circles, aes(x1,x2,colour=preds.svm)) +
+  geom_point() +
+  ggtitle("SVM Preds") +
+  theme(legend.position = "none")
+
+
+grid.arrange(g1,g3,g4,ncol=2)
+
+Accuracy(preds.logreg, test.circles$y==1)
+ConfusionMatrix(preds.tree, test.circles$y)
+table(predict=preds.svm,actual=(test.circles$y==1))
+```
+
+Based on the results, the SVM model produced the highest accuracy.
+
+
+### Varied
+
+```{r, message=FALSE, warning=FALSE, error=FALSE}
+
+tree.varied <- rpart(y~x1+x2, data=train.varied)
+
+svmfit.varied <-  tune(svm ,y ~ x1+x2,data=train.varied ,kernel ="radial",
+                       scale =FALSE, 
+                       ranges =list(cost=c(0.01, 0.05, .1 ,1 ,10 ,100 ,1000),
+                                    gamma=c(0.5,1,2,3,4)))
+
+preds.tree <- predict(tree.varied,test.varied, type="class")
+preds.svm <- predict(svmfit.varied$best.model,test.varied, type="class")
+
+g1 <- ggplot(test.varied, aes(x1,x2,colour=y)) +
+  geom_point() + 
+  ggtitle("True Classes") + 
+  theme(legend.position = "none")
+g2 <- ggplot(test.varied, aes(x1,x2,colour=preds.tree)) +
+  geom_point() +
+  ggtitle("Decision Tree Preds") +
+  theme(legend.position = "none")
+g3 <- ggplot(test.varied, aes(x1,x2,colour=preds.svm)) +
+  geom_point() +
+  ggtitle("SVM Preds") +
+  theme(legend.position = "none")
+
+grid.arrange(g1,g2,g3,ncol=2)
+
+ConfusionMatrix(preds.tree, test.varied$y)
+table(predict=preds.svm,actual=(test.varied$y==1))
+```
+
+Based on the results, the decision tree produced the highest accuracy.
 
 
 \pagebreak
