@@ -390,10 +390,14 @@ Based on the decision tree generated, the salary of a player who's been in the l
 
 ```{r}
 preds <- predict(hitters.tree, test_hitters)
-cat("Log salary of every hitter in the test set:")
+```
+Log salary of every hitter in the test set:
+```{r}
 preds
+```
+
+```{r}
 RMSE <- RMSE(preds,test_hitters$Salary)
-n <- length(test_hitters$Salary)
 SSE <- (RMSE^2)*nrow(test_hitters)
 cat("Total Sum Squared Error (SSE) for the regression model:", SSE)
 ```
@@ -419,7 +423,8 @@ ConfusionMatrix(preds_heart, test_heart$AHD)
 ## 2.4. Bagging: Regression 
 Fitting bagging model to Hitters training dataset, the 4 of the player salaries are predicted:
 ```{r}
-train_hitters.bag <- train_hitters[complete.cases(train_hitters), ] # Only include data that's all filled
+## Only include data that's all filled
+train_hitters.bag <- train_hitters[complete.cases(train_hitters), ] 
 hitters.bag <- randomForest(Salary ~ . , data = train_hitters.bag, mtry = ncol(train_hitters.bag)-1) # all columns but the output
 preds.bag <- predict(hitters.bag, test_hitters)
 cat("The predicted log salaries of the first 4 players are: ", head(preds.bag, 4))
