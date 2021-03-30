@@ -1,6 +1,6 @@
 ---
 title: 'Assignment 3'
-author: "Mitheysh Asokan"
+author: "Mitheysh Asokan, Eungjoo Kim"
 geometry: margin=.75in
 output:
   pdf_document: default
@@ -339,16 +339,128 @@ Based on the results, the decision tree produced the highest accuracy.
 
 
 ## Question 2: Tree-based methods
+```{r echo=FALSE, message=FALSE, error=FALSE}
+library(ISLR)
+library("rpart")
+library("rattle")
+library("caret")
+library("randomForest")
+library("MLmetrics")
+```
 
 ## 2.1 Preprocess
+This step involves splitting both the Heart and Hitters dataset into training and testing sets. Furthermore, the salaries within the Hitters dataset has been transformed to the logs of themselves. Lastly, the row identifier of the Heart dataset has been taken out for the sake of simplicity in prediction. 
 
+The Hitters dataset contains some missing data denoted by "NA". In order to compensate for such discrepancies and for simplicity's sake, the data has been manipulated to omit such missing information and only work with rows with full data columns.
+
+```{r}
+setwd("~/446Assignments/Assignment3")
+heart <- read.csv("Heart.csv")[,-1]
+
+Hitters <- na.omit(Hitters)
+Hitters$Salary <- log10(Hitters$Salary)
+
+## 70% of the sample size
+smp_size_hitters <- floor(0.70 * nrow(Hitters))
+smp_size_heart <- floor(0.70 * nrow(heart))
+
+## set the seed to make your partition reproducible
+set.seed(112)
+
+## Split the Hitters data to 70/30
+train_ind_hitters <- sample(seq_len(nrow(Hitters)), size = smp_size_hitters)
+train_hitters <- Hitters[train_ind_hitters, ]
+test_hitters <- Hitters[-train_ind_hitters, ]
+cat("hitters train size:", nrow(train_hitters), "hitters test size:", nrow(test_hitters))
+
+## Split the heart data to 70/30
+train_ind_heart <- sample(seq_len(nrow(heart)), size = smp_size_heart)
+train_heart <- heart[train_ind_heart, ]
+test_heart <- heart[-train_ind_heart, ]
+cat("hitters train size:", nrow(train_heart), "hitters test size:", nrow(test_heart))
+```
 ## 2.2 Decision Trees for Regression
+Fit decision tree of Hitters dataset, where salary is a function of Hits and Years
+```{r}
+hitters.tree <- rpart(Salary ~ Hits + Years, data=train_hitters)
+fancyRpartPlot(hitters.tree, caption="")
+```
+
+Based on the decision tree generated, the salary of a player who's been in the league for 6 seasons and had 125 hits can be found by looking at node 7 of the Figure above. Transforming the output back to the actual salary, 10^2.9 gives $794.33. 
+
+```{r}
+preds <- predict(hitters.tree, test_hitters)
+cat("Log salary of every hitter in the test set:")
+preds
+RMSE <- RMSE(preds,test_hitters$Salary)
+n <- length(test_hitters$Salary)
+SSE <- (RMSE^2)*nrow(test_hitters)
+cat("Total Sum Squared Error (SSE) for the regression model:", SSE)
+```
 
 ## 2.3. Decision Trees for Classification
+Classification decision tree is generated on the Heart training set, by mapping AHD to all predictors as follows:
+```{r}
+heart.tree <- rpart(AHD ~ ., data=train_heart)
+fancyRpartPlot(heart.tree, caption="")
+preds_heart <- predict(heart.tree, test_heart, type = "class")
+```
+
+The prediction accuracy for the first 5 patients in the test set using "predict" can be found as:
+```{r}
+Accuracy(preds_heart[1:5],test_heart$AHD[1:5]) 
+```
+
+The confusion matrix for the resulted classification tree:
+```{r}
+ConfusionMatrix(preds_heart, test_heart$AHD)
+```
 
 ## 2.4. Bagging: Regression 
+Fitting bagging model to Hitters training dataset, the 4 of the player salaries are predicted:
+```{r}
+train_hitters.bag <- train_hitters[complete.cases(train_hitters), ] # Only include data that's all filled
+hitters.bag <- randomForest(Salary ~ . , data = train_hitters.bag, mtry = ncol(train_hitters.bag)-1) # all columns but the output
+preds.bag <- predict(hitters.bag, test_hitters)
+cat("The predicted log salaries of the first 4 players are: ", head(preds.bag, 4))
+RMSE.bag <- RMSE(preds.bag, test_hitters$Salary)
+SSE.bag <- (RMSE.bag^2)*nrow(test_hitters)
+cat("Total Sum Squared Error (SSE) for the bagging model:", SSE.bag)
+```
+The SSE of the bagging model is lower than that of the regression tree.
 
 ## 2.5. Bagging: Classification
+Fitting the bagging model to Heart training dataset by mapping AHD to all predictors 
+```{r}
+train_heart.bag <- train_heart[complete.cases(train_heart), ]
+train_heart.bag$AHD <- factor(train_heart.bag$AHD)
+heart.bag <- randomForest(AHD ~ . , data = train_heart.bag)
+preds_heart.bag <- predict(heart.bag, test_heart, type = "class")
+cat("The predicted results for the first 4: ", head(preds_heart.bag, 4))
+```
+
+The confusion matrix for the resulted classification bagging model:
+```{r}
+ConfusionMatrix(preds_heart.bag, test_heart$AHD)
+```
+
+The prediction accuracy for the first 5 patients in the test set using "predict" can be found as:
+```{r}
+Accuracy(preds_heart.bag[1:5],test_heart$AHD[1:5]) 
+```
+
+The accuracy seems to be much better for the bagging model. This is due to the fact that bagging model uses cross validation on decision trees by fitting different trees and averaging the predictions. 
 
 ## 2.6. Random Forest: Regression
+Fitting random forest model to Hitters data by mapping salary to all predictors:
+```{r}
+train_hitters_2.6 <- na.omit(train_hitters)
+hitters.forest <- randomForest(Salary ~ . , data = train_hitters_2.6,mtry = 6, importance=T)
+preds.forest <- predict(hitters.forest, test_hitters)
+cat("The predicted log salaries of the first 4 players are: ", head(preds.bag, 4))
+RMSE.forest <- RMSE(preds.forest, test_hitters$Salary)
+SSE.forest <- (RMSE.forest^2)*nrow(test_hitters)
+cat("Total Sum Squared Error (SSE) for the random forest model:", SSE.forest)
+```
+The SSE for the random forest model is slightly lower than the bagging model. 
 

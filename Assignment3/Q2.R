@@ -2,12 +2,13 @@ library(ISLR)
 library("rpart")
 library("rattle")
 library("caret")
-library(randomForest)
+library("randomForest")
 library("MLmetrics")
 
-heart <- read.csv("Heart.csv")[,-1]
 setwd("~/446Assignments/Assignment3")
+heart <- read.csv("Heart.csv")[,-1]
 
+Hitters <- na.omit(Hitters)
 # Hitters$Salary <- log10(Hitters$Salary) #Make sure to uncomment on first iteration
 
 ## 70% of the sample size
@@ -36,9 +37,9 @@ fancyRpartPlot(hitters.tree, caption="")
 preds <- predict(hitters.tree, test_hitters)
 head(preds, 4)
 ind <- !is.na(test_hitters$Salary) # Filter out the Na values in Salary
-RMSE <- RMSE(preds[ind],test_hitters$Salary[ind])
-n <- length(test_hitters$Salary[ind])
-SSE <- (RMSE^2)*n
+RMSE <- RMSE(preds,test_hitters$Salary)
+n <- length(test_hitters$Salary)
+SSE <- (RMSE^2)*nrow(test_hitters)
 
 ## Q 2.3. Decision Trees for Classification
 heart.tree <- rpart(AHD ~ ., data=train_heart)
@@ -52,9 +53,9 @@ train_hitters.bag <- train_hitters[complete.cases(train_hitters), ] # Only inclu
 hitters.bag <- randomForest(Salary ~ . , data = train_hitters.bag, mtry = ncol(train_hitters.bag)-1) # all columns but the output
 preds.bag <- predict(hitters.bag, test_hitters)
 head(preds.bag, 4)
-RMSE.bag <- RMSE(preds.bag[ind], test_hitters$Salary[ind])
-n <- length(test_hitters$Salary[ind])
-SSE.bag <- (RMSE.bag^2)*n
+RMSE.bag <- RMSE(preds.bag, test_hitters$Salary)
+n <- length(test_hitters$Salary)
+SSE.bag <- (RMSE.bag^2)*nrow(test_hitters)
 
 ## Q 2.5 Bagging: Classification
 train_heart.bag <- train_heart[complete.cases(train_heart), ]
@@ -69,9 +70,9 @@ train_hitters_2.6 <- na.omit(train_hitters)
 hitters.forest <- randomForest(Salary ~ . , data = train_hitters_2.6,mtry = 6, importance=T)
 preds.forest <- predict(hitters.forest, test_hitters)
 head(preds.forest, 4)
-RMSE.forest <- RMSE(preds.forest[ind], test_hitters$Salary[ind])
-n <- length(test_hitters$Salary[ind])
-SSE.forest <- (RMSE.forest^2)*n
+RMSE.forest <- RMSE(preds.forest, test_hitters$Salary)
+n <- length(test_hitters$Salary)
+SSE.forest <- (RMSE.forest^2)*nrow(test_hitters)
 
 
 
