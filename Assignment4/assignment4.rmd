@@ -1,0 +1,100 @@
+---
+title: 'Assignment 4'
+author: "Mitheysh Asokan, Eungjoo Kim"
+geometry: margin=.75in
+output:
+  pdf_document: default
+  word_document: default
+  html_document:
+    df_print: paged
+    theme: cosmo
+header-includes:
+- \usepackage{graphicx}
+- \usepackage{color}
+graphics: yes
+fontsize: 11pt
+---
+
+
+```{r echo=FALSE, message=FALSE}
+library(keras)
+```
+
+
+
+## Question 1: Classification using NNets
+
+## 1.1. Get the data
+```{r, message=FALSE, warning=FALSE}
+mnist <- dataset_fashion_mnist()
+
+x_train <- mnist$train$x
+y_train <- mnist$train$y
+x_test <- mnist$test$x
+y_test <- mnist$test$y
+
+dim(x_train)
+dim(x_test)
+
+y_test  <- y_test[1:2560]
+x_train <- x_train[1:10240,,]
+x_test  <- x_test[1:2560,, ]
+
+y_train <- y_train[1:10240]
+y_test  <- y_test[1:2560]
+```
+
+\pagebreak
+
+## 1.2 Plot
+### Plot of a trouser (class 1)
+```{r, message=FALSE, warning=FALSE}
+digit <- x_train[17,28:1,1:28] 
+par(pty="s") # for keeping the aspect ratio 1:1
+image(t(digit), col = gray.colors(256), axes = FALSE)
+```
+
+\pagebreak
+
+## 1.2 Plot
+### Plot of a bag (class 9)
+```{r, message=FALSE, warning=FALSE}
+digit <- x_train[58,28:1,1:28]
+par(pty="s") # for keeping the aspect ratio 1:1
+image(t(digit), col = gray.colors(256), axes = FALSE)
+```
+
+\pagebreak
+
+## 1.2 Plot
+### Plot of an Ankle boot (class 10)
+```{r, message=FALSE, warning=FALSE}
+digit <- x_train[12,28:1,1:28]
+par(pty="s") # for keeping the aspect ratio 1:1
+image(t(digit), col = gray.colors(256), axes = FALSE)
+```
+
+\pagebreak
+
+## 1.3 Process the dataset
+```{r, message=FALSE, warning=FALSE}
+# reshape
+x_train <- array_reshape(x_train, c(nrow(x_train), 784))
+x_test <- array_reshape(x_test, c(nrow(x_test), 784))
+# rescale
+x_train <- x_train / 255
+x_test <- x_test / 255
+
+# convert binary to categorical
+y_train <- to_categorical(y_train, 10)
+y_test <- to_categorical(y_test, 10)
+head(y_train)
+```
+
+\pagebreak
+
+## 1.4 Fit a Shallow Network
+
+\pagebreak
+
+## 1.5 Fit a Deep Neural Network
