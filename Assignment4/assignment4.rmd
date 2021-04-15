@@ -105,7 +105,7 @@ model %>%
   layer_dense(units = 32, activation = 'relu', input_shape = c(784)) %>% 
   layer_dense(units = 10, activation = 'softmax')
 
-summary(model)
+# summary(model)
 
 model %>% compile(
   loss = 'categorical_crossentropy',
@@ -133,7 +133,7 @@ model %>%
   layer_dense(units = 128, activation = 'relu', input_shape = c(784)) %>% 
   layer_dense(units = 10, activation = 'softmax')
 
-summary(model)
+# summary(model)
 
 model %>% compile(
   loss = 'categorical_crossentropy',
@@ -161,7 +161,7 @@ model %>%
   layer_dense(units = 256, activation = 'relu', input_shape = c(784)) %>% 
   layer_dense(units = 10, activation = 'softmax')
 
-summary(model)
+# summary(model)
 
 model %>% compile(
   loss = 'categorical_crossentropy',
@@ -189,7 +189,7 @@ model %>%
   layer_dense(units = 32, activation = 'sigmoid', input_shape = c(784)) %>% 
   layer_dense(units = 10, activation = 'softmax')
 
-summary(model)
+# summary(model)
 
 model %>% compile(
   loss = 'categorical_crossentropy',
@@ -217,7 +217,7 @@ model %>%
   layer_dense(units = 128, activation = 'sigmoid', input_shape = c(784)) %>% 
   layer_dense(units = 10, activation = 'softmax')
 
-summary(model)
+# summary(model)
 
 model %>% compile(
   loss = 'categorical_crossentropy',
@@ -245,7 +245,7 @@ model %>%
   layer_dense(units = 256, activation = 'sigmoid', input_shape = c(784)) %>% 
   layer_dense(units = 10, activation = 'softmax')
 
-summary(model)
+# summary(model)
 
 model %>% compile(
   loss = 'categorical_crossentropy',
@@ -263,6 +263,9 @@ model %>% evaluate(x_test, y_test)
 
 ```
 
+
+The configuration for Relu, with 128 hidden neurons performed the best.
+
 \pagebreak
 
 ## 1.5 Fit a Deep Neural Network
@@ -278,7 +281,7 @@ model %>%
   layer_dense(units = 32, activation = 'relu') %>% 
   layer_dense(units = 10, activation = 'softmax')
 
-summary(model)
+# summary(model)
 
 model %>% compile(
   loss = 'categorical_crossentropy',
@@ -307,7 +310,7 @@ model %>%
   layer_dense(units = 32, activation = 'sigmoid') %>% 
   layer_dense(units = 10, activation = 'softmax')
 
-summary(model)
+# summary(model)
 
 model %>% compile(
   loss = 'categorical_crossentropy',
@@ -336,7 +339,7 @@ model %>%
   layer_dense(units = 128, activation = 'relu') %>% 
   layer_dense(units = 10, activation = 'softmax')
 
-summary(model)
+# summary(model)
 
 model %>% compile(
   loss = 'categorical_crossentropy',
@@ -365,7 +368,7 @@ model %>%
   layer_dense(units = 128, activation = 'sigmoid') %>% 
   layer_dense(units = 10, activation = 'softmax')
 
-summary(model)
+# summary(model)
 
 model %>% compile(
   loss = 'categorical_crossentropy',
@@ -383,7 +386,7 @@ model %>% evaluate(x_test, y_test)
 
 ```
 
-
+The configuration for relu, with 128 and 32 hidden neurons performed the best. 
 
 
 
