@@ -1,4 +1,6 @@
+library(tensorflow)
 library(keras)
+
 mnist <- dataset_fashion_mnist()
 
 x_train <- mnist$train$x
